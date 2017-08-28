@@ -1,0 +1,93 @@
+<?php
+
+/**
+ * Implements hook_block_info().
+ */
+function dexp_popup_login_block_info() {
+  $blocks = array();
+  $blocks['bootstrap-login'] = array(
+    'info' => t('Bootstrap Login/Register Menu'),
+    'status' => TRUE,
+    'region' => 'top_left',
+    'visibility' => BLOCK_VISIBILITY_NOTLISTED,
+    'pages' => '',
+  );
+  return $blocks;
+}
+/**
+ * Implements hook_block_view().
+ */
+function dexp_popup_login_block_view($delta = '') {
+  switch ($delta) {
+    case 'bootstrap-login':
+      return user_is_logged_in() ? NULL : _bootstrap_config_login_block_view();
+  }
+  return NULL;
+}
+function _bootstrap_config_login_block_view() {
+//	$login_form = drupal_get_form('user_login_block');
+  drupal_add_css('#apigee-sso-signin-block { left: 0; right: 0; padding-left: 0; border-left: 0px solid #aaa; top: 4.8em; }', array('group' => CSS_THEME, 'type' => 'inline'));
+  drupal_add_css('#apigee-sso-signin-block ul.federated-buttons { margin: 0 0 0 20px; padding: .25em 0; list-style:none;  }', array('group' => CSS_THEME, 'type' => 'inline'));
+  drupal_add_css('#login input{width: 385px !important;}', array('group' => CSS_THEME, 'type' => 'inline'));
+
+  $login_form = drupal_get_form('user_login');
+	$register_form = drupal_get_form('user_register_form');
+  $content = '<ul class="nav pull-right">';
+  $content .= '<li class="dropdown">';
+  $content .= '<a class="dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-lock"></i> ' . t('Sign in') . '</a>';
+  $content .= '<div class="dropdown-menu embedded-form">' . drupal_render($login_form) . '</div>';
+  $content .= '</li>';
+  if (variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)) {
+    $content .= '<li class="dropdown">';
+    $content .= '<a class="dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-user"></i> ' . t('Register') . '</a>';
+    $content .= '<div class="dropdown-menu embedded-form">' . drupal_render($register_form) . '</div>';
+    $content .= '</li>';
+  }
+  $content .= '</ul>';
+  return array(
+    'subject' => NULL,
+    'content' => $content,
+  );
+}
+/**
+ * Implements hook_form_alter().
+ */
+function dexp_popup_login_form_alter(&$form, &$form_state, $form_id) {
+  switch ($form_id) {
+    case 'user_login_block':
+    //case 'user_register_form':
+      // Add ajax wrapper to form.
+
+
+      $html_id = str_replace('_', '-', $form_id);
+      $form['#prefix'] = '<div id="ajax-' . $html_id . '-wrapper">';
+      $form['#suffix'] = '</div>';
+      //form['pass']['#suffix'] = l('Request new password','user/password');
+      $form['pass']['#field_suffix'] = l('<span class="fa fa-question-circle"></span>','user/password', array('html'=>true,'attributes'=>array('class'=>array('forgot-password','dtooltip'),'data-toggle'=>'tooltip','data-original-title'=>t('Request new password'),'data-placement'=>'bottom','data-container'=>'body')));
+      $form['links'] = '';
+      // Add ajax functionality to form submit button.
+      $form['actions']['submit']['#ajax'] = array(
+        'callback' => '_bootstrap_config_ajax_callback',
+        'wrapper' => 'ajax-' . $html_id . '-wrapper',
+        'event' => 'click',
+      );
+      break;
+  }
+}
+function _bootstrap_config_ajax_callback($form, $form_state) {
+  ctools_include('ajax');
+  ctools_add_js('ajax-responder');
+  if (form_get_errors()) {
+    return $form; // Reload form if it didn't pass validation.
+  }
+  if ($form['#id'] === 'user-login') {
+    drupal_set_message(check_plain('Successful login'));
+  }
+  $commands = array();
+  $commands[] = ctools_ajax_command_reload();
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands
+  );
+}
+?>

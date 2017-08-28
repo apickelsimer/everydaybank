@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the dexp_shoot_commerce feature.
+ */
+
+include_once 'dexp_shoot_commerce.features.inc';

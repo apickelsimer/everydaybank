@@ -1,0 +1,67 @@
+1 Product Selection for Certification
+    * select product list to select from
+    * Company name
+    * Contact Info of submitter name, phone, email, role
+    * 
+	* certification Doc
+2 Test Run Criteria
+	* Environment certification
+	* Transactional Request Information
+	* Transactional Payload Submitting
+3 Summary of Request
+	* validation
+
+
+Certification  	/v1/certification
+Submit 			/cert_submit
+		payload
+			{ "name": req_20151214000001',
+			  "user": "cobregon@apigee.com,
+			  "company": "Cass Inc.",
+			  "phone": "214-641-7567",
+			  "email" : "cobregon@apigee.com",
+			  "product": "lifecycle-demo",
+			  "environment": "test",
+			  "request_info": "asdasdasddas",
+			  "payload" : "sdasdasdasd"
+			  }
+Products		/cert_products			  
+Report Status	/cert_status
+	response
+	  { "name": "req_888888",
+	    "email": "cobregon@apigee.com",
+	    "status": "success",
+	    "status_msg": "Completed all phases of jUnit test a-z."
+	  },
+	  { "name": "req_888888",
+	    "email": "cobregon@apigee.com",
+	    "status": "success",
+	    "status_msg": "Completed all phases of jUnit test a-z."
+	  },
+	   
+
+______________________________________________________
+
+rate_the_room		select_certify
+rate_the_service	run_criteria
+personal_details 	summary_request
+
+rate_the_room  		select
+rate_the_service 	criteria
+personal_details 	summary
+
+______________________________________________________
+
+1.
+	product
+	company
+	name
+	phone
+	email
+	role
+2.
+	environment
+	trans_req
+	trans_payload
+3.
+	all_valid

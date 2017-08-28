@@ -1,0 +1,58 @@
+<?php
+
+module_load_include('inc', 'customer_certify', 'includes/customer_certify.navigation');
+module_load_include('inc', 'customer_certify', 'includes/customer_certify.validate');
+module_load_include('inc', 'customer_certify', 'includes/customer_certify.submit');
+
+
+/**
+ * Implements hook_menu().
+ */
+function customer_certify_menu() {
+
+  $items = array();
+  $items['customer-certify'] = array(
+    'title' => 'Customer Certify',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('customer_certify_form'),
+    'access arguments' => array('access content'),
+    'file' => 'includes/customer_certify.form.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+  
+  $items['complete-page'] = array(
+    'title' => 'Certify Complete',
+    'page callback' => 'customer_certify_complete',
+    'page arguments' => array(),
+    'access arguments' => array('access content'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  $items['certify-status'] = array(
+    'title' => 'Certify Status',
+    'page callback' => 'customer_certify_status',
+    'page arguments' => array(),
+    'access arguments' => array('access content'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  
+  return $items;
+}
+
+
+/*
+ * Implements hook_mail().
+ */
+function customer_certify_mail($key, &$message, $params) {
+    
+  if (isset($params['subject'])) {
+    $message['subject'] = $params['subject'];
+  } 
+  if (isset($params['body'])) {
+    $message['body'][] = $params['body']; 
+  }
+  if (isset($params['headers']) && is_array($params['headers'])) {   
+    $message['headers'] += $params['headers'];
+  }
+  
+}

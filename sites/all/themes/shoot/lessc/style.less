@@ -1,0 +1,253 @@
+@import url(http://fonts.googleapis.com/css?family=Muli:400,300,300italic,400italic);
+body{
+    font-family: 'Muli', sans-serif;
+    font-size: 13px;
+    color: @text_color;
+    background-color: @base_color;
+    font-weight: 300;
+    &.boxed{
+        .dexp-body-inner{
+            max-width: 1170px;
+            margin: 0 auto;
+            box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+            background: #FFF;
+        }
+    }
+    &.preset-dark {
+       #section-top{
+            border-bottom: 1px solid #333;
+        }
+        .bg-reflect-section {
+            background: #333;
+        }
+    }
+}
+
+.bg-reflect-section {
+    background: #EEE;
+}
+#section-header{
+    &.fixed{
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+}
+.preset-white{
+    .overlay-color{
+        background: #f1f1f1;
+    }
+}
+.preset-dark{
+    .overlay-color{
+        background: #333;
+    }
+}
+.dark-wrapper{
+    background-color: #F5F5F5;
+}
+.bg-gray{
+    background-color:#f6f6f6;
+}
+.bg-white{
+    background-color:#fff;
+}
+#section-main-content {
+    padding-top:50px;
+}
+body.preset-white{
+    #section-page-title{
+        background-color: #fafafa;
+        border-bottom: 1px solid #f1f1f1;
+        border-top: 1px solid #f1f1f1;
+    }
+}
+body.preset-dark{
+    #section-page-title{
+        border-bottom: 1px solid #333;
+        border-top: 1px solid #333;
+    }
+}
+.page_title {
+    margin: 47px 0;
+    font-size: 22px;
+    font-weight: normal;
+}
+.page_title_has_sub {
+    .page_title {
+        margin-bottom:0px;
+    }
+}
+.breadcrumb {
+    list-style: none outside none;
+    margin: 0;
+    padding: 49px 0;
+    text-align: right;
+    background-color: transparent;
+    border-radius: 0 none;
+    a {
+        color: #666666;
+        padding:0 10px;
+        font-size:14px;
+        &:first-child{
+            padding: 0 10px 0 0;
+        }
+    }
+}
+#section-top {
+    background: @base_color;
+}
+#section-bottom{
+    background-color: #222;
+    color: #FFF;
+    .block-title {
+        color: #FFF;
+        font-size:1.4em;
+        margin: 15px 0;
+        padding: 10px 0;
+    }
+}
+
+#section-footer{
+    background-color: #333;
+    padding:30px 0 15px 0;
+    .region-copyright, .region-copyright a{
+        color: #CCC; 
+    }
+    #block-menu-menu-footer-menu {
+        ul:not(.contextual-links) {
+            list-style:none;
+            text-align:right;
+            margin-top:10px;
+            li {
+                list-style-type:none;
+                display:inline-block;
+                a {
+                    color: #FFF;
+                }
+            }
+        }
+    }
+}
+
+#section-bottom {
+    padding: 55px 0 80px 0;
+}
+.video-item {
+    height: auto;
+    left: 0;
+    min-height: 100%;
+    min-width: 100%;
+    overflow: hidden;
+    position: absolute;
+    top: -10px;
+    width: auto;
+    z-index: 0;
+}
+.dexp-grid-items .dexp-grid-item{margin-bottom: 30px;}
+
+.contact-info {
+    ul {
+        margin:0;
+        padding:0;
+        list-style:none;
+        li {
+            list-style-type:none;
+            line-height:40px;
+            span {
+                color: #888;
+            }
+            i {
+                width: 30px;
+                text-align: center;
+                margin-right: 20px;
+            }
+        }
+    }
+}
+
+.copyright {
+    margin-top:70px;
+}
+.block-dexp-popup-login{
+    .form-item-pass{
+        position: relative;
+        .field-suffix{
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            right: 3px;
+            top: 3px;
+            z-index: 999;
+            //border: 1px solid @base_color;
+            //border-radius: 50%;
+            text-align: center;
+            line-height: 26px;
+            a{
+                color: @base_color !important;
+                font-size: 19px !important;
+            }
+        }
+    }
+    .item-list ul{
+        li{
+            a{color: @text_color;}
+        }
+    }
+}
+
+//Services box
+.services-box{
+    background: url("../images/black-noise.jpg");
+}
+.block-overlay{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left:0;
+    div{
+        height: 100%;
+    }
+}
+.bg-cover-right{
+    background-size: cover auto;
+    background-position: top right !important;
+}
+.bg-cover-left{
+    background-size: cover auto;
+    background-position: top left !important;
+}
+.bx-wrapper .bx-viewport{
+    background: transparent !important;
+    .bxslide{
+      /*text-align: center;*/
+        img{
+            margin: 0 auto;
+        }
+    }
+}
+@media screen and (max-width: 767px){
+    .region-breadcrumb{
+        .breadcrumb{
+        text-align: left;
+        }
+    }
+    #section-footer {
+        .block {
+            text-align:center;
+        }
+        #block-menu-menu-footer-menu {
+            ul:not(.contextual-links) {
+                text-align:center;
+                padding:0;
+                margin:0;
+            }
+        }
+    }
+    #timeline .time-mark {
+        display:none;
+    }
+}
+.dark-overlay-40{
+    .YTPOverlay{
+        background-color: rgba(0,0,0,.4);
+    }
+}

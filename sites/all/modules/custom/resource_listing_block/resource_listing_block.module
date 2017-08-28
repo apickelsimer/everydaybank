@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Resource Listing Block feature.
+ */
+
+include_once 'resource_listing_block.features.inc';

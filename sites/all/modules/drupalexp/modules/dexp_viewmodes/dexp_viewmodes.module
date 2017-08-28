@@ -1,0 +1,77 @@
+<?php
+
+/**
+* Implements hook_entity_info_alter().
+*/
+function dexp_viewmodes_entity_info_alter(&$entity_info) {
+  $entity_info['node']['view modes']['time_line'] = array(
+    'label' => t('Blog Timeline'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['node']['view modes']['large'] = array(
+    'label' => t('Blog Large Image'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['node']['view modes']['gallery'] = array(
+    'label' => t('Blog Gallery'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['node']['view modes']['item_box'] = array(
+    'label' => t('Blog Box Item'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['node']['view modes']['medium'] = array(
+    'label' => t('Blog Medium Image'),
+    'custom settings' => TRUE,
+  );
+  
+  $entity_info['node']['view modes']['hover_image'] = array(
+    'label' => t('Team Hover Image'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['node']['view modes']['popup_image'] = array(
+    'label' => t('Team popup Image'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['node']['view modes']['portfolio_bxslider'] = array(
+    'label' => t('Portfolio bxSlider'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['node']['view modes']['product_sidebar'] = array(
+    'label' => t('Product Sidebar'),
+    'custom settings' => TRUE,
+  );
+}
+
+/**
+* Implements hook_preprocess_node().
+*/
+function dexp_viewmodes_preprocess_node(&$vars) {
+  if($vars['view_mode'] == 'time_line') {
+    $vars['theme_hook_suggestions'][] = 'node__' . $vars['type'] . '__time_line';
+  }
+  if($vars['view_mode'] == 'large') {
+    $vars['theme_hook_suggestions'][] = 'node__' . $vars['type'] . '__large';
+  }
+  if($vars['view_mode'] == 'medium') {
+    $vars['theme_hook_suggestions'][] = 'node__' . $vars['type'] . '__medium';
+  }
+  if($vars['view_mode'] == 'gallery') {
+    $vars['theme_hook_suggestions'][] = 'node__' . $vars['type'] . '__gallery';
+  }
+  if($vars['view_mode'] == 'item_box') {
+    $vars['theme_hook_suggestions'][] = 'node__' . $vars['type'] . '__item_box';
+  }
+  if($vars['view_mode'] == 'hover_image') {
+    $vars['theme_hook_suggestions'][] = 'node__' . $vars['type'] . '__hover_image';
+  }
+  if($vars['view_mode'] == 'popup_image') {
+    $vars['theme_hook_suggestions'][] = 'node__' . $vars['type'] . '__popup_image';
+  }
+  if($vars['view_mode'] == 'portfolio_bxslider') {
+    $vars['theme_hook_suggestions'][] = 'node__' . $vars['type'] . '__portfolio_bxslider';
+  }
+  if($vars['view_mode'] == 'product_sidebar') {
+    $vars['theme_hook_suggestions'][] = 'node__' . $vars['type'] . '__product_sidebar';
+  }
+}

@@ -1,0 +1,288 @@
+<?php
+
+function apiproduct_listing_init() {
+  if (arg(0) != 'admin') {
+    // for module-specific css and JS
+
+    // drupal_add_css('//cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/pure-min.css',
+    //                array('type' => 'external'));
+
+    $modPath = drupal_get_path('module', 'apiproduct_listing');
+    drupal_add_js($modPath . '/js/filter.js', 'file');
+    drupal_add_js($modPath . '/js/apiproduct_listing.js', 'file');
+
+    //$path = drupal_get_path('module', 'dpchiesa_validate_userreg');
+    // drupal_add_css($path . '/dpchiesa_validate_userreg.css');
+  }
+}
+
+function apiproduct_listing_menu() {
+  $items['apiproducts'] = array(
+    'title' => 'API Products',
+    'type' => MENU_CALLBACK,
+    'page callback' => 'apiproduct_listing_apiproducts',
+    'access arguments' => array('administer API Products settings'),
+    'access callback' => 'user_is_logged_in',
+  );
+
+  return $items;
+}
+
+function apiproduct_listing_name_to_element_id($name) {
+    //Lower case everything
+    $string = strtolower($name);
+    //Make alphanumeric (removes all other characters)
+    $string = preg_replace("/[^a-z0-9_\s-]/", "-", $string);
+    //Convert whitespaces and underscore to dash
+    $string = preg_replace("/[\s_]/", "-", $string);
+    return $string;
+}
+
+function apiproduct_listing_reform_apiproduct($tmp_product) {
+  $ret = array(
+    'name' => $tmp_product['product']->name,
+    'element_id' => apiproduct_listing_name_to_element_id($tmp_product['product']->name),
+    // 'attributes' => $tmp_product['product']->attributes;
+    'display_name' => $tmp_product['product']->displayName,
+    'description' => $tmp_product['description'],
+    'link_doc' => $tmp_product['link_doc'],
+    'link_img' => $tmp_product['link_img'],
+    'categories' => array(),
+    );
+  if (isset($tmp_product['product']->attributes['category'])) {
+    $ret['categories'] = array_map('trim', explode(',', $tmp_product['product']->attributes['category']));
+  }
+  if (strlen($tmp_product['description']) > 150) {
+    $ret['description_150'] = substr($tmp_product['description'], 0, 150) . '...';
+  }
+  else {
+    $ret['description_150'] = $tmp_product['description'];
+  }
+  return $ret;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function apiproduct_listing_permission() {
+  return array(
+    'administer apiproduct_listing settings' => array(
+      'title' => t('Administer API Products settings'),
+    ),
+  );  
+}
+
+function apiproduct_listing_apiproducts() {
+  drupal_add_css(drupal_get_path('module', 'apiproduct_listing') . '/css/apiproduct_listing.css');
+  $category = 'all';
+  if (isset($_GET['category'])) {
+    $category = $_GET['category'];
+  }
+
+  $config = devconnect_default_org_config();
+  $org = $config->orgName;
+  $api_products = entity_load('api_product', array(), array('orgName' => $org));
+  $path_docs = drupal_get_path('module', 'apiproduct_listing') . '/docs';
+
+  $themed_products = array();
+  $tmp_products = array();
+  foreach ($api_products as $product) {
+
+    $roleAccess = true;
+    $rolelist = array();
+    if (isset($product->attributes['roles'])) {
+      $rolelist = array_map('trim', explode(',', $product->attributes['roles']));
+      $roleAccess = apiproduct_listing_get_roles_access($rolelist);
+    }
+
+    if ($roleAccess) {
+      $prd_desc = (isset($product->attributes['ext_description']) ? $product->attributes['ext_description'] : $product->description );
+      $prd_doc = (isset($product->attributes['doc_url']) ? $product->attributes['doc_url'] : '/apis' );
+      $prd_img = (isset($product->attributes['image_url']) ? $product->attributes['image_url'] : $path_docs .'/'. substr(ucwords($product->displayName),0,1) . '.png' );
+
+      if ($category == 'all') {
+        $tmp_products[] = array(
+          'product' => $product,
+          'display_name' => $product->displayName,
+          'description' => $prd_desc,
+          'link_doc' => $prd_doc,
+          'link_img' => $prd_img);
+      }
+      else {
+        if (isset($product->attributes['category'])) {
+          $catlist = explode(',', $product->attributes['category']);
+          for ($i = 0; $i < count($catlist); $i++) {
+            $aCat = trim($catlist[$i]);
+            if ($aCat === $category) {
+              $tmp_products[] = array(
+                'product' => $product,
+                'display_name' => $product->displayName,
+                'description' => $prd_desc,
+                'link_doc' => $prd_doc,
+                'link_img' => $prd_img);
+            }
+          }
+        }
+        else {
+          continue;
+        }
+      }
+    }
+  }
+
+  usort($tmp_products,'apiproduct_products_sort_by_name');
+  for ($i = 0; $i < count($tmp_products); $i++) {
+    $aprod = $tmp_products[$i];
+    $prd = $aprod['product'];
+    $prd_dis = $aprod['display_name'];
+    $prd_desc = $aprod['description'];
+    $prd_doc = $aprod['link_doc'];
+    $prd_img = $aprod['link_img'];
+    $themed_products[] = theme('apiproduct_listing_apiproduct', array(
+      'product' => $prd,
+      'display_name' => $prd_dis,
+      'description' => $prd_desc,
+      'link_doc' => $prd_doc,
+      'link_img' => $prd_img,
+    ));
+
+  }
+  $num_products = count($themed_products);
+
+
+  return theme('apiproduct_listing_apiproducts', array(
+    'products' => $themed_products,
+    'raw_products' => array_map('apiproduct_listing_reform_apiproduct', $tmp_products),
+    'num_products' => $num_products,
+  ));
+}
+
+function apiproduct_products_sort_by_name($a,$b) {
+  return strcmp($a['display_name'], $b['display_name']);
+}
+
+function apiproduct_category_sort_by_name($a,$b) {
+  return strcmp(strtolower($a[0]), strtolower($b[0]));
+}
+
+function apiproduct_listing_theme() {
+  $path = drupal_get_path('module', 'apiproduct_listing') . '/templates';
+
+  return array(
+    'apiproduct_listing_apiproducts' => array(
+      'path' => $path,
+      'variables' => array(
+        'products' => array(),
+        'num_products' => NULL,
+      ),
+      'template' => 'apiproduct-listing-apiproducts',
+    ),
+    'apiproduct_listing_apiproduct' => array(
+      'path' => $path,
+      'variables' => array(
+        'product' => NULL,
+        'display_name' => NULL,
+        'description' => NULL,
+        'link_doc' => NULL,
+        'link_img' => NULL,
+      ),
+      'template' => 'apiproduct-listing-apiproduct',
+    ),
+  );
+}
+
+function apiproduct_listing_block_info() {
+  $blocks = array();
+  $blocks['product_listing_block'] = array(
+    'info' => t('Product Category'),
+  );
+  return $blocks;
+}
+
+function apiproduct_listing_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'product_listing_block':
+      $block['title'] = t('API Categories');
+      $block['content'] = apiproduct_listing_get_product_category_list();
+      break;
+  }
+  return $block;
+}
+
+function apiproduct_listing_get_roles_access($roleslist) {
+  global $user;
+  $found_role = false;
+  $usr_roles = $user->roles;
+  for ($i = 0; $i < count($roleslist); $i++) {
+    $aRole = trim($roleslist[$i]);
+    if (in_array($aRole, $user->roles)) {
+      $found_role = true;
+    }
+  }
+  return $found_role;
+}
+
+function apiproduct_listing_get_product_category_list() {
+  $config = devconnect_default_org_config();
+  $org = $config->orgName;
+  $api_products = entity_load('api_product', array(), array('orgName' => $org));
+
+  $tmpcats = array();
+  $categories = array();
+  $category_links = array();
+  if (!empty($api_products)) {
+    $category_links[] = l(ucwords('All'), 'apiproducts', array(
+      'query' => array(
+        'category' => 'all',
+      ),
+      'attributes' => array(
+        'class' => array('apiproduct-category-link'),
+      ),
+    ));
+
+    foreach ($api_products as $product) {
+      $roleAccess = true;
+      $rolelist = array();
+      if (isset($product->attributes['category'])) {
+        if (isset($product->attributes['roles'])) {
+          $rolelist = explode(',', $product->attributes['roles']);
+          $roleAccess = apiproduct_listing_get_roles_access($rolelist);
+        }
+        if ($roleAccess) {
+          $catlist = explode(',', $product->attributes['category']);
+          for ($i = 0; $i < count($catlist); $i++) {
+            $aCat = trim($catlist[$i]);
+            if ((!in_array($aCat, $tmpcats)) && ($aCat != 'all')) {
+              $tmpcats[] = ucwords($aCat);
+            }
+          }
+        }
+      }
+    }
+
+    sort($tmpcats);
+
+    foreach ($tmpcats as $tmpCat) {
+      $categories[] = $tmpCat;
+      $category_links[] = l(ucwords($tmpCat),
+          'apiproducts', array(
+            'query' => array(
+              'category' => $tmpCat,
+            ),
+            'attributes' => array(
+            'class' => array('apiproduct-category-link'),
+          ),
+      ));
+    }
+  }
+
+  return theme('item_list', array(
+    'items' => $category_links,
+    'title' => t('API Categories'),
+    'type' => 'ul',
+    'attributes' => array(
+      'class' => array('apiproduct-category-list'),
+    ),
+  ));
+}

@@ -1,0 +1,72 @@
+<?php
+
+/*
+ * Implements hook_schema
+ */
+function directv_product_roles_schema() {
+
+  $schema['directv_api_product_roles'] = array(
+    'description' => 'Store API Product roles.',
+    'fields' => array(
+      'name' => array(
+        'description' => 'API Product Machine name',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'displayName' => array(
+        'description' => 'API Product Name',
+        'description' => 'First Name',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'portalRole' => array(
+        'description' => 'API Product Dev Portal Role',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+      'approvalType' => array(
+        'description' => 'API Product Approval Type',
+        'type' => 'varchar',
+        'length' => 16,
+        'not null' => FALSE,
+      ),
+      'apisDeployedIn' => array(
+        'description' => 'Environment API Product deployed in',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('name', 'portalRole')
+  );
+
+  $schema['directv_content_roles'] = array(
+    'description' => 'Store roles for content for views to utilize in relationships.',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'The primary identifier for a node.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'view_any_roles' => array(
+        'description' => 'Contains View Any Roles for Content Access.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+      'view_own_roles' => array(
+        'description' => 'Contains View Own Roles for Content Access.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('nid')
+  );
+
+  return $schema;
+}

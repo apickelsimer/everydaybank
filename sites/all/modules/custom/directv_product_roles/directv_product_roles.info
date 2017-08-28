@@ -1,0 +1,4 @@
+name = DirectV Product Roles
+description = DirectV Product Roles Code
+package = DirectV
+core = 7.x

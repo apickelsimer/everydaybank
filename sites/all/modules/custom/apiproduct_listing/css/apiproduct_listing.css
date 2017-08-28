@@ -1,0 +1,110 @@
+/*
+    Document   : apiproduct_listing.css
+    Created on : 14 Aug, 2015, 8:56:48 PM
+    Author     : Sudheesh, Cass Obregon
+    Description:
+        Purpose of the stylesheet follows.
+        v1.1 Modifications for product, image, link and button
+*/
+
+root {
+    display: block;
+}
+.api-product-item-row {
+    float: left;
+    width: 100%;
+}
+.clear-fix{
+    clear: both;
+}
+.api-product-item {
+    float: left;
+    margin: 10px;
+    height: 380px;
+    width: 30%;
+    vertical-align: middle;
+    background-color: rgba(220, 217, 217, 0.18);
+    border: 1px solid #ccc;
+}
+
+.api-product-wrapper {
+    margin: 0 auto;
+    text-align: center;
+    height: 100%;
+    padding: 20px 10px;
+}
+
+#block-apiproduct-listing-product-listing-block h2{
+    display: none;
+}
+ul.apiproduct-category-list{
+    padding: 10px;
+}
+
+.apiproduct-category-list li{
+    list-style: none;
+}
+
+.api-product-link {
+    height: 100px;
+    padding: 15px 15px;    
+}
+
+.api-product-name {
+    font-family: "Open Sans", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    color: #515157;    
+    padding: 10px 10px;
+    margin-top: 1px;    
+    margin-bottom: 1px;    
+}
+
+.api-product-name:before {
+    content: "";
+    width: 100%;
+    height: 2px;
+    background-color: #ecf0f1;
+    display: block;
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+}
+
+
+.api-product-desc {
+    font-family: "Open Sans", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    line-height: 20px;
+    margin-top: 5px;
+}
+
+.apiproduct-btn-default {
+    background: #ecf0f1;
+    color: #999;
+    padding: 10px 20px;
+    margin: 15px 0;
+    font-family: "Open Sans", Helvetica, Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-shadow: none;
+    border: none;
+    text-transform: uppercase;
+    -webkit-border-radius: 4px;
+    border-color: #ccc;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    touch-action: manipulation;
+    cursor: pointer;
+    -webkit-user-select: none;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+ul.apiproduct-category-list > li > input.category-name,
+ul.apiproduct-category-list > li > input.category-all {
+  width: auto;
+  margin-right: 4px;
+}

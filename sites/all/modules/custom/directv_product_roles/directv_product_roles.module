@@ -1,0 +1,122 @@
+<?php
+/**
+ * @file
+ * Code for enforcing API Product roles assigned to custom attribute
+ * "portalRoles" in API Products entity.
+ * Users can only access API Products who contain the role(s) associated
+ * to "portalRoles"
+ *
+ * @author cgalindo
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function directv_product_roles_menu() {
+  $items = array();
+
+  $items['admin/reset/content-roles'] = array(
+    'page callback' => 'directv_content_access_roles_reset',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+
+/**
+ * Implements hook_views_api
+ */
+function directv_product_roles_views_api() {
+  return array(
+    'api' => '3',
+    'path' => drupal_get_path('module','directv_product_roles'). '/views',
+  );
+}
+
+/**
+ * Filter list of API Products by custom attribute "portalRoles"
+ *
+ * @param array $api_products
+ * @param stdClass|null $account
+ */
+function directv_product_roles_apiproduct_list_alter(array &$api_products, $account = NULL) {
+  global $user;
+  $api_products_copy = $api_products;
+  $api_product_roles = unserialize(variable_get('directv_product_roles', ''));
+
+  foreach ($api_products_copy as $product) {
+    $check = array_intersect($api_product_roles[$product->name], array_values($user->roles));
+    if (empty($check)) {
+      unset($api_products[$product->name]);
+    }
+  }
+}
+
+/*
+ * Implements in hook_cron()
+ * Stores roles from custom attribute "portalRoles" for each
+ * API Product into a Drupal variable.
+ */
+function directv_product_roles_cron() {
+  $config = devconnect_default_org_config();
+  $orgName = $config->orgName;
+  $products = entity_load('api_product', array(), array('show_private' => FALSE, 'orgName' => $orgName));
+
+  // Clear table
+  $result = db_query('DELETE FROM directv_api_product_roles');
+  $all_roles = array();
+  foreach ($products as $product) {
+    $roles = trim($product->attributes['portalRoles']);
+    if (!empty($roles)) {
+      $productRoles = explode(',', $roles);
+      $all_roles[$product->name] = $productRoles;
+      foreach($productRoles as $role) {
+        $fields = array(
+          'name' => $product->name,
+          'displayName' => $product->displayName,
+          'portalRole' => $role,
+          'approvalType' => $product->approvalType,
+          'apisDeployedIn' => $product->attributes['apisDeployedIn'],
+        );
+        db_insert('directv_api_product_roles')->fields($fields)->execute();
+      }
+    }
+  }
+  variable_set('directv_product_roles', serialize($all_roles));
+}
+
+/**
+ * Reset
+ */
+function directv_content_access_roles_reset() {
+  // Ensure table is clean
+  $result = db_query('DELETE FROM directv_content_roles');
+  $roles = user_roles();
+
+  $query = db_select('node', 'n');
+  $query->fields('n', array('nid'));
+  $results = $query->execute()->fetchCol();
+  foreach($results as $nid){
+    $node = node_load($nid);
+    $content_roles = content_access_get_per_node_settings($node);
+    $content_roles_string = '';
+    $comma = '';
+    foreach ($content_roles['view'] as $value) {
+      $content_roles_string .= $comma . $roles[$value];
+      $comma = ', ';
+    }
+
+    $fields = array(
+      'nid' => $nid,
+      'view_any_roles' => $content_roles_string,
+      'view_own_roles' => '',
+    );
+
+    db_insert('directv_content_roles')->fields($fields)->execute();
+  }
+
+  return '<h1>Content Roles have been reset.</h1>';
+}
+

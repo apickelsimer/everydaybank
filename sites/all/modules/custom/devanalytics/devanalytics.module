@@ -1,0 +1,777 @@
+<?php
+
+    module_load_include('inc', 'devanalytics', 'inc/devanalytics_conf');
+
+    function devanalytics_menu(){
+	  $items = array();
+ 
+	  $items['user/analytics/devanalytics/geo'] = array(
+	    //'title'            => t('Hi Slider'),
+	    'page callback'    => 'devanalytics_output',
+        'page arguments'   => array('geo'),
+//	    'access arguments' => array('access content'),
+          'access callback' => 'user_is_logged_in',
+	  );
+
+      $items['user/analytics/devanalytics/apps'] = array(
+        //'title'            => t('Hi Slider'),
+        'page callback'    => 'devanalytics_output',
+//        'type' => MENU_CALLBACK,
+        'page arguments'   => array('apps'),
+//        'access arguments' => array('access content'),
+        'access callback' => 'user_is_logged_in',
+      );
+
+      $items['user/analytics/devanalytics/errors'] = array(
+        //'title'            => t('Hi Slider'),
+        'page callback'    => 'devanalytics_output',
+        'page arguments'   => array('errors'),
+        'access arguments' => array('access content'),
+        'access callback' => 'user_is_logged_in',
+      );
+
+      $items['user/analytics/devanalytics/tps'] = array(
+        //'title'            => t('Hi Slider'),
+        'page callback'    => 'devanalytics_output',
+        'page arguments'   => array('tps'),
+        'access arguments' => array('access content'),
+        'access callback' => 'user_is_logged_in',
+      );
+
+      $items['user/analytics/devanalytics/payload'] = array(
+        //'title'            => t('Hi Slider'),
+        'page callback'    => 'devanalytics_output',
+        'page arguments'   => array('payload'),
+        'access arguments' => array('access content'),
+        'access callback' => 'user_is_logged_in',
+      );
+
+      $items['admin/config/analytics/config_info'] = array(
+        'title' => 'Analytics Configuration',
+        'description' => 'Configuration for analytics module',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('devanalytics_config_form'),
+        'access arguments' => array('access administration pages'),
+        'access callback' => 'user_is_logged_in',
+        'type' => MENU_NORMAL_ITEM,
+      );
+	  
+	  return $items;
+	}
+ 
+	function devanalytics_init(){
+		
+		$drupal_version = 7;
+		if ( $drupal_version == '7' )
+		{
+			$module_path = base_path() . drupal_get_path('module', 'devanalytics');
+		}
+		else
+		{
+			$module_path = drupal_get_path('module', 'devanalytics');
+		}
+	}
+
+    function devanalytics_drop() {
+        if (db_table_exists('devanalytics_settings')) {
+            $data_type = Database::getConnection()->schema()->dropTable('devanalytics_settings');
+        }
+
+    }
+
+    function devanalytics_install() {
+        if (!db_table_exists('devanalytics_settings')) {
+            $data_type = Database::getConnection()->databaseType();
+            switch ($data_type) {
+                case 'mysql':
+                case 'mysqli':
+                db_query("CREATE TABLE IF NOT EXISTS {devanalytics_settings} (
+                            `apigee_host` varchar(255) NOT NULL,
+                            `apigee_org` varchar(255) NOT NULL,
+                            `apigee_env` varchar(255) NOT NULL,
+                            `apigee_auth` varchar(255) NOT NULL,
+                            `apigee_days` varchar(255) NOT NULL,
+                            `apigee_timeout` varchar(255) NOT NULL,
+                            `apigee_timeunit` varchar(255) NOT NULL,
+                            `apigee_filter` varchar(255) NOT NULL,
+                            `admin` varchar(255) NOT NULL
+                        ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;
+                        ");
+                drupal_set_message("Schema Defined...");
+                break;
+                case 'pgsql':
+                break;
+            }
+        }
+    }
+
+    function devanalytics_defaultvalues() {
+        try {
+                db_insert('devanalytics_settings')
+                   -> fields(array(
+                        'apigee_host' => 'https://api.enterprise.apigee.com',
+                        'apigee_org' => 'everydaybank',
+                        'apigee_env' => 'test',
+                        'apigee_auth' => '21e1e13e13e13e31e',
+                        'apigee_days' => '1',
+                        'apigee_timeout' => '45',
+                        'apigee_timeunit' => 'day',
+                        'apigee_filter' => 'true',
+                        'admin' => 'admin',
+                ))
+                -> execute();            
+                drupal_set_message("Default Valued Defined...");
+        } catch (Exception $e) {
+            drupal_set_message(t("Cannot Default Data..."), 'error');
+            drupal_set_message(t($e), 'error');
+           
+        }
+    }
+
+
+    function devanalytics_values($apigee_host, $apigee_org, $apigee_env, $apigee_auth, $apigee_days, $apigee_timeout, $apigee_timeunit, $apigee_filter) {
+        try {
+                db_insert('devanalytics_settings')
+                   -> fields(array(
+                        'apigee_host' => $apigee_host,
+                        'apigee_org' => $apigee_org,
+                        'apigee_env' => $apigee_env,
+                        'apigee_auth' => $apigee_auth,
+                        'apigee_days' => $apigee_days,
+                        'apigee_timeout' => $apigee_timeout,
+                        'apigee_timeunit' => $apigee_timeunit,
+                        'apigee_filter' => $apigee_filter,
+                        'admin' => 'admin',
+                ))
+                -> execute();            
+                drupal_set_message("Default Valued Defined...");
+        } catch (Exception $e) {
+            drupal_set_message(t("Cannot Default Data..."), 'error');
+            drupal_set_message(t($e), 'error');
+           
+        }        
+    }
+
+    function default_time_types() {
+        $def_types = array(
+            'day' => t('Day'),
+            'hour' => t('Hour'),
+            );
+        return $def_types;
+    }
+
+    function default_filter_types() {
+        $def_types = array(
+            'false' => t('False'),
+            'true' => t('True'),
+            );
+        return $def_types;
+    }
+
+    function devanalytics_config_form($form,&$form_state) {
+        try {
+        $query  = db_select('devanalytics_settings')
+                        -> fields('devanalytics_settings', array('apigee_host','apigee_org','apigee_env','apigee_auth','apigee_days','apigee_timeout','apigee_timeunit','apigee_filter'))
+                        -> condition('admin','admin');
+        $def_values = $query->execute()->fetchAssoc();            
+        } catch (Exception $e) {
+           drupal_set_message(t("Previous Values not found..."), 'error');
+
+           devanalytics_install();
+           devanalytics_defaultvalues();
+        }
+        $timeTypes = default_time_types();
+
+        $form['devanalytics_config_host'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Host URL'),
+            '#default_value' => isset($def_values['apigee_host']) ? $def_values['apigee_host'] : 'https://api.enterprise.apigee.com',
+            '#required' => TRUE,
+            '#description' => t('Host name of API Management.'),
+            );
+
+        $form['devanalytics_config_org'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Organization Name'),
+            '#default_value' => isset($def_values['apigee_org']) ? $def_values['apigee_org'] : 'everydaybank',
+            '#required' => TRUE,
+            '#description' => t('API Management Organization Name.'),
+            );
+
+        $form['devanalytics_config_env'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Environment Name'),
+            '#default_value' => isset($def_values['apigee_env']) ? $def_values['apigee_env'] : 'test',
+            '#required' => TRUE,
+            '#description' => t('API Management Environment Name.'),
+            );
+
+        $form['devanalytics_config_auth'] = array(
+            '#type' => 'password',
+            '#title' => t('Authorization Key'),
+            '#default_value' => isset($def_values['apigee_auth']) ? $def_values['apigee_auth'] : '21e1e13e13e13e31e',
+//            '#default_value' => isset($def_values['apigee_auth']) ? base64_decode($def_values['apigee_auth']) : '21e1e13e13e13e31e',
+            '#required' => TRUE,
+            '#description' => t('Authorization Basic Key.'),
+            );
+
+        $form['devanalytics_config_days'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Days Back'),
+            '#default_value' => isset($def_values['apigee_days']) ? $def_values['apigee_days'] : '1',
+            '#required' => TRUE,
+            '#description' => t('Number of days to report against. Starting with current day.'),
+            );
+
+        $form['devanalytics_config_timeout'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Timeout Value'),
+            '#default_value' => isset($def_values['apigee_timeout']) ? $def_values['apigee_timeout'] : '45',
+            '#required' => TRUE,
+            '#description' => t('Timeout value for a reporting analysis.'),
+            );
+
+        $form['devanalytics_config_timeunit'] = array(
+            '#type' => 'select',
+            '#title' => t('Time Unit Value'),
+            '#default_value' => isset($def_values['apigee_timeunit']) ? $def_values['apigee_timeunit'] : 'day',
+            '#options' => default_time_types(),
+            '#required' => TRUE,
+            '#description' => t('Time Unit value for a reporting analysis.'),
+            );
+
+        $form['devanalytics_config_filter'] = array(
+            '#type' => 'select',
+            '#title' => t('User Filter Value'),
+            '#default_value' => isset($def_values['apigee_filter']) ? $def_values['apigee_filter'] : 'true',
+            '#options' => default_filter_types(),
+            '#required' => TRUE,
+            '#description' => t('User Apps filter for a reporting analysis.'),
+            );
+
+        $form['save'] = array(
+                '#type'   => 'submit',
+                '#value'  => 'Update',
+                '#submit' => array('devanalytics_config_form_submit'),
+                '#validate' => array('devanalytics_config_form_validate'),
+        );
+        return system_settings_form($form);
+    }
+
+    function devanalytics_config_form_validate($form, $form_state) {
+        if ($form_state['values']['devanalytics_config_auth'] == '21e1e13e13e13e31e') {
+            if ((strlen($form_state['values']['devanalytics_config_auth']) < 6)) {
+                form_set_error('Authorization', 'Please enter Valid Authorization key');
+                drupal_set_message("Please enter Valid Authorization key.");                
+            }
+            else {
+                drupal_set_message("Generic Authorization Key used.");                
+            }
+        }
+    }
+
+    function devanalytics_config_form_submit($form, $form_state) {
+        $values = array(
+            'apigee_host' => $form_state['values']['devanalytics_config_host'],
+            'apigee_org' => $form_state['values']['devanalytics_config_org'],
+            'apigee_env' => $form_state['values']['devanalytics_config_env'],
+            'apigee_auth' => $form_state['values']['devanalytics_config_auth'],
+            'apigee_days' => $form_state['values']['devanalytics_config_days'],
+            'apigee_timeout' => $form_state['values']['devanalytics_config_timeout'],
+            'apigee_timeunit' => $form_state['values']['devanalytics_config_timeunit'],
+            'apigee_filter' => $form_state['values']['devanalytics_config_filter']
+        );
+        try {
+                $result = db_select('devanalytics_settings')
+                        -> fields('devanalytics_settings', array('apigee_host','apigee_org','apigee_env','apigee_auth','apigee_days','apigee_timeout','apigee_timeunit','apigee_filter'))
+                        -> condition('admin','admin')
+                        -> execute()
+                        -> fetchAssoc();
+                if ($result) {
+                    $insert = db_update('devanalytics_settings')
+                        -> fields(array(
+                            'apigee_host' => $form_state['values']['devanalytics_config_host'],
+                            'apigee_org' => $form_state['values']['devanalytics_config_org'],
+                            'apigee_env' => $form_state['values']['devanalytics_config_env'],
+                            'apigee_auth' => $form_state['values']['devanalytics_config_auth'],
+                            'apigee_days' => $form_state['values']['devanalytics_config_days'],
+                            'apigee_timeout' => $form_state['values']['devanalytics_config_timeout'],
+                            'apigee_timeunit' => $form_state['values']['devanalytics_config_timeunit'],
+                            'apigee_filter' => $form_state['values']['devanalytics_config_filter'],
+  //                            'apigee_auth' => base64_encode($form_state['values']['devanalytics_config_auth']),
+                            'admin' => 'admin',
+                        ))
+                        -> condition('admin','admin')
+                        -> execute();
+                } else {
+                    $insert = db_insert('devanalytics_settings')
+                        -> fields(array(
+                            'apigee_host' => $form_state['values']['devanalytics_config_host'],
+                            'apigee_org' => $form_state['values']['devanalytics_config_org'],
+                            'apigee_env' => $form_state['values']['devanalytics_config_env'],
+                            'apigee_auth' => $form_state['values']['devanalytics_config_auth'],
+                            'apigee_days' => $form_state['values']['devanalytics_config_days'],
+                            'apigee_timeout' => $form_state['values']['devanalytics_config_timeout'],
+                            'apigee_timeunit' => $form_state['values']['devanalytics_config_timeunit'],
+                            'apigee_filter' => $form_state['values']['devanalytics_config_filter'],
+//                            'apigee_auth' => base64_encode($form_state['values']['devanalytics_config_auth']),
+                            'admin' => 'admin',
+                        ))
+                        -> execute();
+                }
+
+        } catch (Exception $e) {
+           drupal_set_message(t("Cannot Save Data..."), 'error');
+           drupal_set_message(t($e), 'error');
+        }
+        drupal_set_message(t('Settings have been saved'));
+    }
+
+    function format_line_data($series,$cat,$title) {
+        $timeConfig = array(
+            'chart'   => array('zoomType' => t('x'), 'spacingRight' => 20),
+            'title'   => array('text' => t($title)),
+//            'xAxis'   => array('type' => t('chart_xaxis'), 'title'   => array('text' => t('Date'))),
+            'xAxis'   => array('categories' => $cat, 'title'   => array('text' => t('Date Time (mm/dd hr)'))),
+            'yAxis'   => array('title' => array('text' => t('Traffic'))),
+            'tooltip' => array('shared' => true),
+            'legend'  => array('enabled' => false),
+            'plotOptions' => array('area' => array(
+                                                'lineWidth' => 1,
+                                                'marker' => array('enabled' => false),
+                                                'shadow' => false,
+                                                'states' => array('hover' => array('lineWidth' => 1)),
+                                                'threshold' => 'null'
+                                                )
+                                ),
+            'series' => $series
+            );
+        return $timeConfig;
+    }
+
+    function user_has_app($app,$user_apps,$filter) {
+        $has_it = FALSE;
+        if ($filter == 'true') {
+            if (in_array($app, $user_apps)) {
+                $has_it = TRUE;
+            }
+        } else {
+            $has_it = TRUE;
+        }
+        return $has_it;
+    }
+
+    function draw_top_geo($apigee_host,$apigee_org, $apigee_env, $apigee_auth, $apigee_days, $apigee_timeout, $apigee_timeunit, $apigee_filter, $user_apps) {
+        $stcds = get_stcodes();
+        $states = get_states();
+
+        $output = '';
+//        $dfStart = 'm/d/Y%20H:i:s:001';
+//        $dfEnd = 'm/d/Y%20H:i:s:999';
+        $dfStart = 'm/d/Y%20H:i:s';
+        $dfEnd = 'm/d/Y%20H:i:s';
+        $d = new DateTime();
+        $to = $d -> format($dfEnd);
+//        $d -> modify('-'.$apigee_days.' day');
+        $d -> modify('-5 day');
+        $from = $d -> format($dfStart);
+
+        $api = $apigee_host . '/v1/o/' . $apigee_org . '/environments/' . $apigee_env . '/stats/city?select=sum(message_count)&timeRange=' . $from . '~' . $to . '&timeUnit='.$apigee_timeunit;
+
+        $options = array(
+                    'method' => 'GET',
+//                    'timeout' => (int)($apigee_timeout),
+                    'timeout' => 100,
+                      'headers' => array('Authorization' => 'Basic ' . $apigee_auth)
+                    );
+        $result = drupal_http_request($api, $options);
+
+        $dataArray = array(
+                Array('State','Popularity')
+            );
+        $res = json_decode($result->data);
+        $dims = $res->environments[0]->dimensions;
+        $ussts = array();
+        for ($i = 0; $i < count($dims); $i++) {
+            $dim = $dims[$i];
+            if (isset($dim->name))
+                if ($dim->name != "") {
+                    $city = $dim->name;
+                    $state = resolve_State($states,$stcds,$city);
+                    $val = (int)($dim->metrics[0]->values[0]->value);
+
+                    if ($state && $ussts[$state]) {
+                        $ussts[$state] += $val;
+                    } elseif ($state) {
+                        $ussts[$state] = $val;                
+                    }
+                }
+        }
+        foreach ($ussts as $st => $qty) {
+                $dataArray[] = Array($st,$qty);
+        }
+
+        $chart=  array(
+                '#type' => 'chart',
+                '#title' => t('Regional Popularity'),
+                '#chart_type' => 'geo',
+                '#chart_library' => 'google',
+            );
+        $chart['geo_data'] = array(
+                '#type' => 'chart_data',
+                '#data' => $dataArray,
+                '#options' => '{region:"US",resolution:"provinces"}',
+            );
+        $output['chart'] = $chart;
+
+        return $output;
+    }
+
+    function draw_top_apps($apigee_host,$apigee_org, $apigee_env, $apigee_auth, $apigee_days, $apigee_timeout, $apigee_timeunit, $apigee_filter, $user_apps) {
+        $output = '';
+        $dfStart = 'm/d/Y%20H:i:s';
+        $dfEnd = 'm/d/Y%20H:i:s';
+        $d = new DateTime();
+        $to = $d -> format($dfEnd);
+        $interval = '-'.$apigee_days.' day';
+        $d -> modify($interval);
+        $from = $d -> format($dfStart);
+        $api = $apigee_host . '/v1/o/' . $apigee_org . '/environments/' . $apigee_env . '/stats/apps?select=message_count&timeRange=' . $from . '~' . $to . '&timeUnit='.$apigee_timeunit.'&sort=ASC&sortby=message_count';
+
+        $options = array(
+                    'method' => 'GET',
+                    'timeout' => (int)($apigee_timeout),
+                    'headers' => array('Authorization' => 'Basic ' . $apigee_auth)
+                    );
+        $result = drupal_http_request($api, $options);
+
+        $series = array();
+        $cat = array();
+        $res = json_decode($result->data);
+        $dims = $res->environments[0]->dimensions;
+        for ($i = 0; $i < count($dims); $i++) {
+            $dim = $dims[$i];
+            if (isset($dim->name))
+                if ($dim->name != "") {
+                    if (user_has_app($dim->name, $user_apps, $apigee_filter)) {
+                        $appName = $dim->name;
+                        $serData = array();
+                        $hdr_set = false;
+                        for ($j = 0; $j < count($dim->metrics[0]->values); $j++) {
+                            $val = (int)($dim->metrics[0]->values[$j]->value);
+                            $serData[] = $val;
+                            $x_dt = date('m/d H',(int)((int)($dim->metrics[0]->values[$j]->timestamp) /1000)).' hr';
+                            if ($hdr_set == false) {
+                                $cat[] = $x_dt;
+                            }
+                        }
+                        if (count($cat) > 0)
+                            $hdr_set = true;
+                        $ser = array('type' => t('line'), 'name' => $appName , 'data' => $serData);
+                        $series[] = $ser;
+                    }
+                }
+        }
+
+        $timeConfig = format_line_data($series,$cat,'Top Ranked Apps');
+
+        $chart = array(
+                '#type' => 'chart',
+                '#title' => t('Top Ranked Apps'),
+                '#chart_type' => 'line',
+                '#chart_library' => 'highcharts',
+                '#custom_data' => 'true',
+                '#custom_series' => $series,
+                '#raw_options' => $timeConfig
+            );
+        $output['chart'] = $chart;
+
+        return $output;
+    }
+
+    function draw_error_apps($apigee_host,$apigee_org, $apigee_env, $apigee_auth, $apigee_days, $apigee_timeout, $apigee_timeunit, $apigee_filter, $user_apps) {
+        $output = '';
+        $dfStart = 'm/d/Y%20H:i:s';
+        $dfEnd = 'm/d/Y%20H:i:s';
+        $d = new DateTime();
+        $to = $d -> format($dfEnd);
+        $interval = '-'.$apigee_days.' day';
+        $d -> modify($interval);
+        $from = $d -> format($dfStart);
+        $api = $apigee_host . '/v1/o/' . $apigee_org . '/environments/' . $apigee_env . '/stats/apps?select=error_count&timeRange=' . $from . '~' . $to . '&timeUnit='.$apigee_timeunit.'&sort=ASC&sortby=error_count';
+
+        $options = array(
+                    'method' => 'GET',
+                    'timeout' => (int)($apigee_timeout),
+                    'headers' => array('Authorization' => 'Basic ' . $apigee_auth)
+                    );
+        $result = drupal_http_request($api, $options);
+
+        $series = array();
+        $cat = array();
+        $res = json_decode($result->data);
+        $dims = $res->environments[0]->dimensions;
+        for ($i = 0; $i < count($dims); $i++) {
+            $dim = $dims[$i];
+            if (isset($dim->name))
+                if ($dim->name != "") {
+                    if (user_has_app($dim->name, $user_apps, $apigee_filter)) {
+                        $appName = $dim->name;
+                        $serData = array();
+                        $hdr_set = false;
+                        for ($j = 0; $j < count($dim->metrics[0]->values); $j++) {
+                            $val = (int)($dim->metrics[0]->values[$j]->value);
+                            $serData[] = $val;
+                            $x_dt = date('m/d H',(int)((int)($dim->metrics[0]->values[$j]->timestamp) /1000)).' hr';
+                            if ($hdr_set == false) {
+                                $cat[] = $x_dt;
+                            }
+                        }
+                        if (count($cat) > 0)
+                            $hdr_set = true;
+                        $ser = array('type' => t('line'), 'name' => $appName , 'data' => $serData);
+                        $series[] = $ser;
+                    }
+                }
+        }
+
+        $timeConfig = format_line_data($series,$cat,'Apps Error Count');
+
+        $chart = array(
+                '#type' => 'chart',
+                '#title' => t('Apps Error Count'),
+                '#chart_type' => 'line',
+                '#chart_library' => 'highcharts',
+                '#custom_data' => 'true',
+                '#custom_series' => $series,
+                '#raw_options' => $timeConfig
+            );
+        $output['chart'] = $chart;
+
+        return $output;
+    }
+
+    function draw_tps_apps($apigee_host,$apigee_org, $apigee_env, $apigee_auth, $apigee_days, $apigee_timeout, $apigee_timeunit, $apigee_filter, $user_apps) {
+        $output = '';
+        $dfStart = 'm/d/Y%20H:i:s';
+        $dfEnd = 'm/d/Y%20H:i:s';
+        $d = new DateTime();
+        $to = $d -> format($dfEnd);
+        $interval = '-'.$apigee_days.' day';
+        $d -> modify($interval);
+        $from = $d -> format($dfStart);
+        $api = $apigee_host . '/v1/o/' . $apigee_org . '/environments/' . $apigee_env . '/stats/apps?select=tps&timeRange=' . $from . '~' . $to . '&timeUnit='.$apigee_timeunit.'&sort=ASC&sortby=tps';
+
+        $options = array(
+                    'method' => 'GET',
+                    'timeout' => (int)($apigee_timeout),
+                    'headers' => array('Authorization' => 'Basic ' . $apigee_auth)
+                    );
+        $result = drupal_http_request($api, $options);
+
+        $series = array();
+        $cat = array();
+        $res = json_decode($result->data);
+        $dims = $res->environments[0]->dimensions;
+        for ($i = 0; $i < count($dims); $i++) {
+            $dim = $dims[$i];
+            if (isset($dim->name))
+                if ($dim->name != "") {
+                    if (user_has_app($dim->name, $user_apps, $apigee_filter)) {
+                        $appName = $dim->name;
+                        $serData = array();
+                        $hdr_set = false;
+                        for ($j = 0; $j < count($dim->metrics[0]->values); $j++) {
+                            $val = (int)($dim->metrics[0]->values[$j]->value);
+                            $serData[] = $val;
+                            $x_dt = date('m/d H',(int)((int)($dim->metrics[0]->values[$j]->timestamp) /1000)).' hr';
+                            if ($hdr_set == false) {
+                                $cat[] = $x_dt;
+                            }
+                        }
+                        if (count($cat) > 0)
+                            $hdr_set = true;
+                        $ser = array('type' => t('line'), 'name' => $appName , 'data' => $serData);
+                        $series[] = $ser;
+                    }
+                }
+        }
+
+        $timeConfig = format_line_data($series,$cat,'Apps TPS');
+
+        $chart = array(
+                '#type' => 'chart',
+                '#title' => t('Apps TPS'),
+                '#chart_type' => 'line',
+                '#chart_library' => 'highcharts',
+                '#custom_data' => 'true',
+                '#custom_series' => $series,
+                '#raw_options' => $timeConfig
+            );
+        $output['chart'] = $chart;
+
+        return $output;
+    }
+
+    function draw_payload_apps($apigee_host,$apigee_org, $apigee_env, $apigee_auth, $apigee_days, $apigee_timeout, $apigee_timeunit, $apigee_filter, $user_apps) {
+        $output = '';
+        $dfStart = 'm/d/Y%20H:i:s';
+        $dfEnd = 'm/d/Y%20H:i:s';
+        $d = new DateTime();
+        $to = $d -> format($dfEnd);
+        $interval = '-'.$apigee_days.' day';
+        $d -> modify($interval);
+        $from = $d -> format($dfStart);
+        $api = $apigee_host . '/v1/o/' . $apigee_org . '/environments/' . $apigee_env . '/stats/apis?select=data_exchange_size&timeRange=' . $from . '~' . $to . '&timeUnit='.$apigee_timeunit.'&sort=ASC&sortby=data_exchange_size';
+
+        $options = array(
+                    'method' => 'GET',
+                    'timeout' => (int)($apigee_timeout),
+                    'headers' => array('Authorization' => 'Basic ' . $apigee_auth)
+                    );
+        $result = drupal_http_request($api, $options);
+
+        $series = array();
+        $cat = array();
+        $res = json_decode($result->data);
+        $dims = $res->environments[0]->dimensions;
+        for ($i = 0; $i < count($dims); $i++) {
+            $dim = $dims[$i];
+            if (isset($dim->name))
+                if ($dim->name != "") {
+                    if (user_has_app($dim->name, $user_apps, $apigee_filter)) {
+                        $appName = $dim->name;
+                        $serData = array();
+                        $hdr_set = false;
+                        for ($j = 0; $j < count($dim->metrics[0]->values); $j++) {
+                            $val = (int)($dim->metrics[0]->values[$j]->value);
+                            $serData[] = $val;
+                            $x_dt = date('m/d H',(int)((int)($dim->metrics[0]->values[$j]->timestamp) /1000)).' hr';
+                            if ($hdr_set == false) {
+                                $cat[] = $x_dt;
+                            }
+                        }
+                        if (count($cat) > 0)
+                            $hdr_set = true;
+                        $ser = array('type' => t('line'), 'name' => $appName , 'data' => $serData);
+                        $series[] = $ser;
+                    }
+                }
+        }
+
+        $timeConfig = format_line_data($series,$cat,'APIs Payload Sz');
+
+        $chart = array(
+                '#type' => 'chart',
+                '#title' => t('Apps Payload Sz'),
+                '#chart_type' => 'line',
+                '#chart_library' => 'highcharts',
+                '#custom_data' => 'true',
+                '#custom_series' => $series,
+                '#raw_options' => $timeConfig
+            );
+        $output['chart'] = $chart;
+
+        return $output;
+    }
+
+    function load_user_api_names() {
+        global $user;
+        $apis = array();
+        $app_entities = entity_load('developer_app', FALSE, array('mail' => $user->mail));
+        foreach ($app_entities as $entity) {
+            $api_entities = $entity->credentialApiProducts;
+
+            for ($j = 0; $j < count(api_entities); $j++) {
+                $a_item = $api_entities[$j];
+                $apis[] = $a_item['apiproduct'];
+            }
+        }
+        return $apis;
+    }
+
+    function load_user_app_names() {
+        global $user;
+        $apps = array();
+        $app_entities = entity_load('developer_app', FALSE, array('mail' => $user->mail));
+        foreach ($app_entities as $entity) {
+            $apps[] = $entity->name;
+        }
+        return $apps;
+    }
+
+    function load_default_values() {
+        $def_values = '';
+        try {
+            $def_values  = db_select('devanalytics_settings')
+                        -> fields('devanalytics_settings', array('apigee_host','apigee_org','apigee_env','apigee_env','apigee_auth','apigee_days','apigee_timeout', 'apigee_timeunit', 'apigee_filter'))
+                        -> execute()
+                        -> fetchAssoc();
+
+        } catch (Exception $e) {
+            $def_values  = db_select('devanalytics_settings')
+                        -> fields('devanalytics_settings', array('apigee_host','apigee_org','apigee_env','apigee_env','apigee_auth'))
+                        -> execute()
+                        -> fetchAssoc();
+            $apigee_host1 = isset($def_values['apigee_host']) ? $def_values['apigee_host'] : 'https://api.enterprise.apigee.com';
+            $apigee_org1  = isset($def_values['apigee_org']) ? $def_values['apigee_org'] : 'everydaybank';
+            $apigee_env1  = isset($def_values['apigee_env']) ? $def_values['apigee_env'] : 'test';
+            $apigee_auth1 = isset($def_values['apigee_auth']) ? $def_values['apigee_auth'] : '21e1e13e13e13e31e';
+            $apigee_days1 = isset($def_values['apigee_days']) ? $def_values['apigee_days'] : '1';
+            $apigee_timeout1 = isset($def_values['apigee_timeout']) ? $def_values['apigee_timeout'] : '45';
+            $apigee_timeunit1 = isset($def_values['apigee_timeunit']) ? $def_values['apigee_timeunit'] : 'day';
+            $apigee_filter1 = isset($def_values['apigee_filter']) ? $def_values['apigee_filter'] : 'true';
+            devanalytics_drop();
+            devanalytics_install();
+            devanalytics_values($apigee_host1,$apigee_org1, $apigee_env1, $apigee_auth1,$apigee_days1,$apigee_timeout1,$apigee_timeunit1,$apigee_filter1);
+        }
+        return $def_values;
+    }
+
+	function devanalytics_output($rpt) {
+		
+		$module_path = base_path() . drupal_get_path('module', 'devanalytics');
+        $def_values = load_default_values();
+        $apigee_host = isset($def_values['apigee_host']) ? $def_values['apigee_host'] : 'https://api.enterprise.apigee.com';
+        $apigee_org  = isset($def_values['apigee_org']) ? $def_values['apigee_org'] : 'everydaybank';
+        $apigee_env  = isset($def_values['apigee_env']) ? $def_values['apigee_env'] : 'test';
+        $apigee_auth = isset($def_values['apigee_auth']) ? $def_values['apigee_auth'] : '21e1e13e13e13e31e';
+        $apigee_days = isset($def_values['apigee_days']) ? $def_values['apigee_days'] : '1';
+        $apigee_timeout = isset($def_values['apigee_timeout']) ? $def_values['apigee_timeout'] : '45';
+        $apigee_timeunit = isset($def_values['apigee_timeunit']) ? $def_values['apigee_timeunit'] : 'day';
+        $apigee_filter = isset($def_values['apigee_filter']) ? $def_values['apigee_filter'] : 'true';
+
+//      $apigee_auth = base64_decode($apigee_auth);
+
+        $user_apps = load_user_app_names();
+
+        global $user;
+        $usr_roles = $user->roles;
+        if (in_array('administrator',$usr_roles)) {
+            $apigee_filter = 'false';
+        }
+
+
+        $html_cd = '';
+
+        if ($rpt == 'geo')
+        {
+            $html_cd = draw_top_geo($apigee_host, $apigee_org, $apigee_env, $apigee_auth, $apigee_days, $apigee_timeout, $apigee_timeunit, $apigee_filter, $user_apps);
+            } else if ($rpt == 'apps')
+        {
+            $html_cd = draw_top_apps($apigee_host,$apigee_org, $apigee_env, $apigee_auth, $apigee_days, $apigee_timeout, $apigee_timeunit, $apigee_filter, $user_apps);
+        } else if ($rpt == 'errors')
+        {
+            $html_cd = draw_error_apps($apigee_host,$apigee_org, $apigee_env, $apigee_auth, $apigee_days, $apigee_timeout, $apigee_timeunit, $apigee_filter, $user_apps);
+        } else if ($rpt == 'tps')
+        {
+            $html_cd = draw_tps_apps($apigee_host,$apigee_org, $apigee_env, $apigee_auth, $apigee_days, $apigee_timeout, $apigee_timeunit, $apigee_filter, $user_apps);
+        } else if ($rpt == 'payload')
+        {
+            $user_apis = load_user_api_names();
+            $html_cd = draw_payload_apps($apigee_host,$apigee_org, $apigee_env, $apigee_auth, $apigee_days, $apigee_timeout, $apigee_timeunit, $apigee_filter, $user_apis);
+        }
+
+		return $html_cd;
+	}
+?>

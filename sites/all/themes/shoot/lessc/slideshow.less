@@ -1,0 +1,77 @@
+.dark-overlay{
+    background: #000;
+    opacity: 0.6;
+}
+.dark-overlay-20{
+    background: #000;
+    opacity: 0.2;
+}
+.shoot-color{
+    color: @base_color;
+}
+.shoot-color-opposite{
+    color: @base_color_opposite;
+}
+.shoot-big{
+    font-family: "Muli","Helvetica",Arial,sans-serif;
+    font-size: 60px;
+    font-weight: 300;
+    letter-spacing: 9px;
+    line-height: 90px;
+    text-align: center;
+    word-spacing: 0;
+    color: #FFF;
+}
+.shoot-big2{
+    font-family: "Muli","Helvetica",Arial,sans-serif;
+    font-size: 48px;
+    font-weight: 300;
+    letter-spacing: 9px;
+    line-height: 90px;
+    text-align: center;
+    word-spacing: 0;
+    color: #FFF;
+}
+shoot-2{
+    font-family: "Muli","Helvetica",Arial,sans-serif;
+    font-size: 40px;
+    font-weight: 300;
+    word-spacing: 0x;
+    line-height: 60px;
+    text-align: center;
+    color: #FFF;
+}
+.shoot-medium{
+    font-family: "Muli","Helvetica",Arial,sans-serif;
+    font-size: 16.8px;
+    letter-spacing: 2px;
+    line-height: 18px;
+    text-align: center;
+    word-spacing: 0;
+    color: #FFF;
+}
+.shoot-btn{
+    border: 1px solid #fff;
+    text-align: center;
+    position: relative;
+    color:#fff;
+    .transition(all,0.3s);
+    &:before{
+        content: "";
+        position: absolute;
+        width: 0;
+        .transition(width,0.3s);
+        height: 100%;
+        background: #fff;
+        display: block;
+        top:0;
+        left:0;
+        z-index: -1;
+    }
+    &:hover{
+        color: #222;
+        &:before{
+            width: 100%;
+        }
+    }
+}

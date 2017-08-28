@@ -1,0 +1,249 @@
+.title-description a { color: #334; font-weight: bold; }
+   
+.method_details .title-description, .view .method_details .title-description {
+	line-height: 1.5em;
+}
+   
+p.PATCH, .view p.get, .view p.post, .view p.put, .view p.delete, .view p.patch, .view p.GET, .view p.POST, .view p.PUT, .view p.DELETE, .view p.PATCH {
+    width: 70px;
+    font-weight: bold;
+ }
+  
+.node-teaser .method_details .title-description, .view .method_details .title-description {
+    max-width: 500px;
+    padding-left: 20px;
+}
+  
+.node-teaser.method_details .description, .view .method_details .description { max-width: 700px; padding-left: 40px; }
+  
+.node-teaser .method_details, .view .method_details { padding: 20px 0px; }
+  
+.view-header { padding: 20px 0px; }
+.view-content { padding-bottom: 50px; }
+
+.comment-wrapper .comment { padding-top: 0px !important; }
+
+div.comment-content { border-left: 4px solid #F4F4F4; }
+.field-name-comment-body .field-label { margin-top: 10px; }
+.comment-author { font-size: 0.9em !important; color: #71c6c1 !important; }
+
+.comment-form #edit-submit {
+    height: auto !important; 
+    background-color: #0f97cb; 
+    border-radius: 2px !important; 
+    color: #FFF !important; 
+    line-height: 1em !important; 
+    border: none !important; 
+    font-weight: bold; 
+    padding: 13px 35px !important;
+    float: left;
+    margin-right: 10px;
+}
+
+.comment-form #edit-preview {
+	text-transform: uppercase;
+    height: auto !important;
+	background-color: #FFF;
+    color: #0f97cb !important;
+    border-radius: 2px !important;
+	border: 1px solid #0f97cb !important;
+    line-height: 1em !important;
+    font-weight: bold;
+    padding: 12px 35px 13px 35px !important;
+    float: left;
+    margin-right: 10px;
+}
+
+.comment-form #edit-subject { border-color: #CCC !important; }
+.comment-form #edit-comment-body-und-0-value { border-color: #CCC !important; }
+.comment-form #edit-captcha-response { border-color: #CCC !important; }
+
+/* detail page */
+
+.smartdocs-wrapper { padding-top: 30px; margin-left: 0px !important; margin-right: 0px !important; }
+
+
+/* oauth sd */
+
+#modal_container.modal .modal-footer p, [role="dialog"].modal .modal-footer p { display: none; }
+#modal_container.modal .modal-footer a.button_save_modal, [role="dialog"].modal-footer a.button_save_modal { float: left; }
+#modal_container.modal .modal-footer a.button_close_modal, [role="dialog"].modal .modal-footer a.button_close_modal { float: left; }
+.btn-submit, .btn-primary { 
+	height: auto !important; 
+	background-color: #009bbb; 
+	border-radius: 2px !important; 
+	color: #FFF !important; 
+	line-height: 1em !important; 
+	border: none !important; 
+	font-weight: bold; 
+	padding: 13px 35px !important;
+	float: left;
+	margin-right: 10px;
+}
+
+#modal_container.modal .modal-footer a.button_close_modal, [role="dialog"].modal .modal-footer a.button_close_modal {
+height: auto !important; 
+	background-color: #FFF; 
+	border-radius: 2px !important; 
+	color: #009bbb !important; 
+	line-height: 1em !important; 
+	border: 1px solid #009bbb !important; 
+	font-weight: bold; 
+	padding: 12px 35px 13px 35px !important;
+	display: inline-block;
+	float: left;
+}
+
+/* detail page */
+
+.smartdocs-wrapper .row { margin-left: 0px !important; margin-right: 0px !important; }
+#method_content h3 { color: #444 !important; font-size: 18px !important; padding: 10px 0px !important; }
+
+body #method_content .resource_description { padding-top: 15px; }
+#method_content .resource_description { min-height: 5px; }
+
+#method_content hr { margin: 10px 0px; color: #EEE; padding: 0px !important; }
+#method_content .row { border: 1px solid #EEE; padding: 10px; margin-top: 30px; } 
+
+.smartdocs-wrapper .col-sm-9 { width: 60%; }
+.smartdocs-wrapper .col-sm-3 { width: 40%; }
+
+hr::after {
+	display: none;
+}
+
+.user-profile .group-middle { width: 60% !important; margin-bottom: 100px !important; }
+.user-profile .group-right { width: 15% !important; }
+.usage-bar-box { padding: 1px; border: 1px solid #EEE; width: 100%; margin-top: 5px; }
+.usage-bar { height: 15px; overflow: hidden; background-color: #71c6c1; border: 1px solid #81D6D1; }
+
+#method_content button#send_request { padding: 13px 40px !important; }
+#method_content button#send_request span { color: #76D1CB; }
+
+
+.table-striped td { vertical-align: middle !important; }
+#method_content select, textarea, input[type="text"], input[type="password"] { margin-bottom: 0px !important; }
+#method_content .operation_container { margin: 30px 0px 0px 0px !important; }
+
+.table-resource-summary h4 { font-size: 18px !important; }
+
+/* smartdocs custom things */
+
+.smart-body-description { font-size: 0.9em; border-left: 4px solid #F4F4F4; padding-left: 6px; margin-bottom: 10px; }
+.smart-body-description-header { font-weight: bold; color: #71c6c1; font-style: italic; }
+
+#send_request { 
+	float: left; 
+	background-color: #009bbb; background-image: none !important; 
+	font-weight: bold !important; 
+	border: none !important; 
+	border-radius: 2px !important; 
+	color: #FFF; 
+	text-transform: uppercase;
+	line-height: 1em !important;
+}
+.custom-reset-button { 
+	float: left; 
+	margin-left: 20px; padding: 10px 35px 11px 35px !important; 
+	background-color: #FFF; 
+	border: 1px solid #009bbb; border-radius: 2px; 
+	color: #009bbb; text-transform: uppercase; 
+}
+#method_content a.link_reset_default { font-weight: bold !important; margin: 0px !important; }
+
+.cm-s-default .cm-string { color: #dc5034; line-height: 1.3em; }
+
+#method_content .operation_container .authentication .sd-well .details a { font-weight: bold !important; color: #009bbb !important; } 
+
+#method_content .operation_container .authentication .sd-well { 
+	width: auto !important;
+	margin: 0px 0px 0px 20px !important; padding: 10px 35px !important;
+	background-color: #FFF;
+	border: 1px solid #009bbb; border-radius: 2px;
+	color: #009bbb; text-transform: uppercase;
+}
+
+
+/* user profile */
+
+.user-profile { line-height: 1.4em !important; }
+.user-profile .field-label-above { margin-bottom: 15px; }
+
+.user-profile .group-left { 
+	background-color: #FAFAFA; 
+	border-radius: 2px; border: 1px solid #F4F4F4; 
+	width: 17% !important; 
+	margin: 0px 3% 100px 0px !important; padding: 2%; 
+}
+
+.user-profile .field-name-field-first-name { font-size: 1.8em; color: #444 !important; }
+.user-profile .field-name-field-last-name { font-size: 1.8em; margin: 15px 0px; padding-bottom: 15px; border-bottom: 2px solid #F4F4F4; color: #444 !important; }
+
+.user-profile dd { margin-bottom: 15px; }
+.user-profile h3 { margin: 55px 0px 15px 0px !important; font-size: 1.8em !important; font-weight: 300 !important; }
+
+.nav-tabs { margin-bottom: 10px !important; }
+
+div#edit-actions.form-actions.form-wrapper { height: 60px !important; margin-bottom: 50px !important; }
+
+
+/* smartdocs sidebar */
+
+.smart-body-sidebar { border: 1px solid #DDD; padding: 5px 10px; background-color: #FFF; font-size: 0.9em; margin-bottom: 20px; }
+.smart-body-sidebar-title { color: #FFF; display: inline-block; font-weight: bold; background-color: #5482ab; padding: 3px 12px; margin: 5px 0px 10px 0px; border-radius: 2px; }
+.smart-body-sidebar-columnguide { border: 1px solid #DDD; padding: 5px 10px; background-color: #F4F4F4; }
+.smart-body-sidebar-columnguide-item { font-weight: bold; display: inline-block; }
+.smart-body-sidebar-properties { padding: 10px; }
+.smart-body-sidebar-prop { display: inline-block; vertical-align: top; line-height: 1.5em; }
+.boldprop { font-weight: bold; color: #71c6c1; } 
+.sb-1 { width: 37%; }
+.sb-2 { width: 15%; }
+.sb-3 { width: 46%; }
+
+
+div#product-dropdown-list input.form-checkbox {
+    margin: -2px 0 0;
+    width: auto;
+}
+
+label.option {
+    display: inline;
+    font-weight: normal;
+    margin-bottom: 0px;
+    font-size: 15px;
+    vertical-align: middle;
+    color:#666;
+}
+
+.apiproduct-description {
+    padding-left: 15px;
+    font-size: 12px;
+    color: #888;
+}
+
+input#edit-human {
+    margin-bottom: 0px !important;
+    border-radius: 0;
+    box-shadow: none;
+    color: #999;
+    display: inline-block;
+    padding: 10px;
+    resize: none;
+    transition: all 0.3s ease 0s;
+    vertical-align: middle;
+}
+
+.form-item.form-type-textfield label {
+    font-size: 16px;
+    color: #666;
+}
+
+.form-item.form-type-checkboxes label {
+    font-size: 16px;
+    color: #666;
+}
+
+.panel-group .panel-title > a {
+    font-size: 14px;
+    padding:0px;
+}

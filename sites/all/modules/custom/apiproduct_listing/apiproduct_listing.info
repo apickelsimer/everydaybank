@@ -1,0 +1,4 @@
+name = API Product Listing
+description = This module provides a categorized display of the Edge API products.
+core = 7.x
+php = 5.3

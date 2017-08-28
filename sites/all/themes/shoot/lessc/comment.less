@@ -1,0 +1,55 @@
+.comment-wrapper {
+    h3 {
+        font-size:18px;
+        line-height:24px;
+    }
+    .comment {
+        padding-top:30px;
+        .links {
+            text-transform: capitalize;
+        }
+    }
+    .comment-avatar {
+        float:left;
+        img {
+            width:80px;
+            height:80px;
+            margin-top:20px;
+            .transition(all,200ms,ease-in-out);
+        }
+    }
+    .comment-content {
+        float:left;
+        width:87%;
+        padding:20px;
+        .comment-author {
+            color: @link_color;
+            margin:0;
+            padding:3px 0;
+            font-size: 14px;
+            line-height: 10px;
+            text-transform: uppercase;
+            a {
+                color: @link_color;
+            }
+        }
+    }
+    .grippie {
+        display:none;
+    }
+}
+.comment-form {
+    .form-submit {
+        background-color: transparent;
+        padding: 0 10px;
+        border: 1px solid @base_color_opposite;
+        border-radius: 0;
+        height: 50px;
+        color: @text_color;
+        .transition(all,0.4s,ease-out);
+        &:hover {
+            background: @base_color_opposite;
+            color: @base_color;
+        }
+    }
+}
